@@ -1,15 +1,50 @@
-Project Title: Development of a Real-Time Payment Fraud Detection System Using Machine Learning
+# Project Proposal and Scope: Real-Time Payment Fraud Detection System
 
-Problem Statement: Increasing volume of payment transaction fraud, the cost of fraudulent chargebacks, and the severe customer friction caused by outdated, high-latency rule engines with high false-positive rates.
+## 1. Official Project Title
+**Development of a Real-Time Payment Fraud Detection System Using Machine Learning**
 
-Target Users: Financial institutions, payment gateway providers, e-commerce platforms, and fraud risk analysts.
+---
 
-Aim: Design and implement a high-throughput, low-latency transaction scoring engine that detects fraudulent transactions in real time while minimizing false positives.
+## 2. Problem Statement
+With the rapid acceleration of digital transactions and e-commerce platforms, payment fraud has evolved from basic rule-evadable tactics into coordinated, multi-vector attacks. Traditional fraud prevention relies heavily on static, hardcoded heuristic rule engines (e.g., flagging transactions over specific thresholds or originating from new IP addresses). 
 
-Objectives:
-Analyze modern ML techniques and relevant benchmark datasets.
-Specify functional/non-functional requirements and system architecture.
-Train and benchmark an ensemble/GBDT model against heuristic rules.
-Build a lightweight REST API prototype for scoring incoming transaction payloads.
+These legacy mechanisms present two critical systemic failures:
+1. **High False Positive Rates (FPR):** Legacy engines disproportionately flag genuine customer payments (frequently exceeding 70% of total alerts), causing unnecessary transaction friction, manual verification overhead, and direct revenue loss due to cart abandonment.
+2. **High Latency and Inflexibility:** Modern e-commerce and banking gateways impose strict Service Level Agreements (SLAs), requiring transaction risk verdicts in under 200 milliseconds. Static rules fail to detect zero-day velocity fraud patterns without human intervention.
 
-Project Scope: What is included (API scoring endpoint, ML model inference pipeline, risk scoring, analyst dashboard wireframes) and what is excluded (live real-money banking licensing, direct PCI-DSS hardware certification).
+---
+
+## 3. Target Users & Stakeholders
+- **Payment Service Providers (PSPs) & Payment Gateways:** Require a low-latency scoring API to evaluate incoming transaction payloads before routing them to card networks.
+- **Financial Institutions & Retail Banks:** Require automated risk-tier categorization to minimize manual audit queues.
+- **Fraud Risk Analysts:** Require interpretable feature importances and transaction risk scores to investigate high-risk anomalies.
+- **E-Commerce Merchants:** Benefit from lowered chargeback penalties and reduced checkout friction for legitimate shoppers.
+
+---
+
+## 4. Research Aim
+To design, train, and benchmark an intelligent, machine-learning-driven fraud detection model capable of classifying streaming payment transactions in real time with high recall on fraudulent cases while significantly lowering false-positive rates compared to traditional heuristic benchmarks.
+
+---
+
+## 5. Engineering Objectives
+1. **Data Preprocessing & Balancing:** Ingest benchmark financial transaction data (e.g., IEEE-CIS Fraud Detection dataset), perform feature engineering (rolling velocity, transaction amount ratios), and resolve extreme class imbalance using techniques like SMOTE and class-weighted loss functions.
+2. **Model Training & Benchmarking:** Train and validate supervised learning algorithms (LightGBM, XGBoost, CatBoost) against baseline heuristic rules, prioritizing metrics like PR-AUC, ROC-AUC, and Recall at fixed low False Positive Rates.
+3. **Low-Latency Inference Engine:** Package the trained pipeline into an inference engine optimized via ONNX Runtime or serialized binaries to ensure sub-200 ms end-to-end response times.
+4. **Service Prototype & API:** Implement a lightweight REST API (FastAPI) accepting transaction JSON payloads and returning a risk score along with a decision tier (`ALLOW`, `MANUAL_REVIEW`, `DECLINE`).
+
+---
+
+## 6. Project Scope Boundaries
+
+### In Scope
+- Processing tabular transaction payloads containing cardholder velocity, transaction amount, timestamp, and device identifiers.
+- Supervised binary classification modeling trained on historical transaction datasets.
+- Calculation of rolling aggregation features.
+- Containerized REST API prototype with scoring endpoints and latency benchmarking.
+- Risk analyst dashboard wireframes and operational architecture diagrams.
+
+### Out of Scope
+- Direct production integration with live card processing networks (Visa, Mastercard) requiring hardware HSMs and PCI-DSS Level 1 certification.
+- Complex multimodal biometric processing (e.g., fingerprint, facial recognition at checkout).
+- Real-money banking settlements and dispute chargeback financial processing.
