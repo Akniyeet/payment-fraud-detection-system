@@ -31,18 +31,27 @@ To design, train, and benchmark an intelligent, machine-learning-driven fraud de
 1. **Data Preprocessing & Balancing:** Ingest benchmark financial transaction data (e.g., IEEE-CIS Fraud Detection dataset), perform feature engineering (rolling velocity, transaction amount ratios), and resolve extreme class imbalance using techniques like SMOTE and class-weighted loss functions.
 2. **Model Training & Benchmarking:** Train and validate supervised learning algorithms (LightGBM, XGBoost, CatBoost) against baseline heuristic rules, prioritizing metrics like PR-AUC, ROC-AUC, and Recall at fixed low False Positive Rates.
 3. **Low-Latency Inference Engine:** Package the trained pipeline into an inference engine optimized via ONNX Runtime or serialized binaries to ensure sub-200 ms end-to-end response times.
-4. **Service Prototype & API:** Implement a lightweight REST API (FastAPI) accepting transaction JSON payloads and returning a risk score along with a decision tier (`ALLOW`, `MANUAL_REVIEW`, `DECLINE`).
+4. **High-Throughput Backend Service & API:** Implement a high-throughput, low-latency REST API service in Go, accepting transaction JSON payloads and querying the scoring service to return a decision tier (`ALLOW`, `MANUAL_REVIEW`, `DECLINE`).
 
 ---
 
-## 6. Project Scope Boundaries
+## 6. Expected Outcomes
+1. A benchmarked gradient-boosted decision model (LightGBM) achieving high Recall on fraud with a verified low False Positive Rate (<2%).
+2. A containerized backend service written in Go ensuring sub-200 ms end-to-end inference latency under concurrent simulated loads.
+3. An analyst-facing web dashboard (React) enabling real-time inspection of high-risk transaction flags, key feature attributions, and audit trails.
+4. Comprehensive technical documentation, performance benchmarks, and reproducibility pipelines committed to the project repository.
+
+---
+
+## 7. Project Scope Boundaries
 
 ### In Scope
 - Processing tabular transaction payloads containing cardholder velocity, transaction amount, timestamp, and device identifiers.
 - Supervised binary classification modeling trained on historical transaction datasets.
-- Calculation of rolling aggregation features.
-- Containerized REST API prototype with scoring endpoints and latency benchmarking.
-- Risk analyst dashboard wireframes and operational architecture diagrams.
+- Calculation of rolling aggregation features and real-time state lookups.
+- Containerized REST API service implemented in Go with scoring integration and latency benchmarking.
+- Interactive Web Dashboard prototype (React) for fraud risk analysts to inspect flagged transactions and review risk metrics.
+- Comprehensive architectural schematics and operational documentation.
 
 ### Out of Scope
 - Direct production integration with live card processing networks (Visa, Mastercard) requiring hardware HSMs and PCI-DSS Level 1 certification.
