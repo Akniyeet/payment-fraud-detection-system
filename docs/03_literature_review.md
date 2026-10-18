@@ -43,6 +43,16 @@ Alessi & Fugini (2026), Georgiev et al. (2026) and the review by Thivaios et al.
 
 Thivaios et al. (2026) recommend time-based splits, AUPRC, cost-tuned thresholds and resampling only inside training folds, and Chakka & Saheb (2026) criticise accuracy-centred comparisons. Most empirical studies in this set still do not follow these practices, so the recommendations have not yet translated into routine practice.
 
+# Research Gap
+
+The first group of gaps concerns evaluation realism. Time-realistic evaluation is rare: only #1 uses a temporal main protocol and only #9 checks chronologically, so random splits likely overestimate performance on evolving fraud. Real, comparable datasets are scarce: most studies use synthetic data, #2 and #7 use non-public data, #6 and #13 do not name their dataset, and the IBM AML variant is unspecified in #1, so results cannot be compared or reproduced. Concept drift is not validated on real streams: it is handled by artificial injection (#12), claimed without an experiment (#6), or tested on a relatively stable stream (#1).
+
+The second group concerns methodology. Leakage-safe imbalance handling is under-examined: resampling appears in #6, #8, #9 and #10, leakage occurs in #10, no leakage control is described in #6, resampling hurt performance in #1, and no study compares imbalance strategies head-to-head under one protocol. Baselines and metrics are weak: baselines are copied or weak in #4, #8 and #12, accuracy-led reporting is common, and cost analyses in #5, #8 and #9 are illustrative and assumption-based, so claimed gains over baselines are unreliable.
+
+The third group concerns robustness, privacy and explainability. Attacks are white-box and in latent space (#11) or GAN-only (#2), and federation is simulated on one partitioned dataset (#8), so realistic attackers and deployments are untested. Explanation layers appear in #1, #4, #5, #8 and #10, but no evaluation of explanation quality is recorded and attention weights are not causal (#5), so their regulatory value is unproven.
+
+The last two gaps concern coverage and reporting. UPI appears only in review #15, while the empirical studies cover card, bank and mobile-money data, so instant-payment rails lack empirical ML studies in this set. Finally, internal contradictions in #4, #6, #8, #10 and #13, and smaller inconsistencies in #2, #5 and #11, limit how far these findings can be cited.
+
 # References
 - [A hybrid deep learning–blockchain framework for reliable fraud detection: a big data–driven approach for real-time FinTech systems](https://www.doi.org/10.1186/s40537-026-01506-5)
 - [A Hybrid Machine Learning Model for Streaming Frequency-Based Anomaly Detection in Banking Transactions](https://www.doi.org/10.32890/jict2026.25.1.4)
