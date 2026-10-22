@@ -1,5 +1,12 @@
 # Existing Systems Comparison – Real-Time Payment Fraud Detection System
 
+**Task ID:** PFD-6  
+**Component:** Component 04 – Existing System Comparison  
+**Author:** Askartau Kadyrbek  
+**Status:** Under Review  
+
+---
+
 ## 1. Purpose and method
 
 This document compares existing payment fraud detection systems against one fixed set of criteria. The goal is to show what the market already solves, what it does not, and why the proposed system is still needed.
@@ -20,16 +27,16 @@ This document compares existing payment fraud detection systems against one fixe
 
 ## 2. Comparison criteria
 
-The criteria are taken from the project requirements (proposal §5–§7 and the architecture NFRs), so that the comparison answers the question "does an existing system already do what we need?".
+The criteria are taken from the project proposal (`01_project_proposal.md`, §5–§7) and the requirements specification (`06_requirements_specification.md`, PFD-9), so that the comparison answers the question "does an existing system already do what we need?".
 
 | ID | Criterion | What is checked | Link to our requirements |
 |----|-----------|-----------------|--------------------------|
-| C1 | Deployment model | SaaS only / on-premise / self-hosted | Run locally with `docker compose`, data stays on own infrastructure (NFR-5 in `07_architecture.md`) |
-| C2 | Detection approach | Rules, ML, or hybrid rules + ML | Hybrid decision modes (rules / ml / hybrid) (FR-1) |
-| C3 | Real-time synchronous decision | Score returned in the request path, latency stated | p95 < 100 ms at ≥ 500 tx/s (NFR-1) |
-| C4 | Decision outputs | Score only, or tiered decision (allow / review / block) | Three-tier decision `APPROVE` / `REVIEW` / `DECLINE` |
-| C5 | Explainability | Per-transaction reasons visible to analysts | Feature attributions (SHAP top-3) for analysts |
-| C6 | Analyst review tools | Review queue / case management | Analyst dashboard with review of flagged payments |
+| C1 | Deployment model | SaaS only / on-premise / self-hosted | Containerized service that runs on own infrastructure (proposal §7, in scope) |
+| C2 | Detection approach | Rules, ML, or hybrid rules + ML | Rules combined with ML risk scoring (FR-3, FR-4) |
+| C3 | Real-time synchronous decision | Score returned in the request path, latency stated | P95 < 100 ms and P99 < 200 ms at ≥ 500 RPS (NFR-1, NFR-2) |
+| C4 | Decision outputs | Score only, or tiered decision (allow / review / block) | Tri-tier decision `ALLOW` / `MANUAL_REVIEW` / `DECLINE` (FR-4) |
+| C5 | Explainability | Per-transaction reasons visible to analysts | TreeSHAP top-3 features per flagged transaction (NFR-5) |
+| C6 | Analyst review tools | Review queue / case management | Analyst review queue and triage dashboard (FR-5) |
 | C7 | Processor independence | Usable with any payment source, or only inside one processor | Generic scoring API for PSPs and banks |
 | C8 | Cost and access | Published price, free tier, or quote only | Usable by a student team and small PSPs |
 | C9 | Openness and reproducibility | Can the model/logic be inspected and benchmarked on a public dataset (IEEE-CIS) | Benchmarking ML vs. heuristic baseline is the research aim |
@@ -55,16 +62,16 @@ Legend: ✅ supported (documented), ◐ partially / with limits, ❌ not support
 ### 4.1 What existing systems already do well
 
 - **Hybrid rules + ML is the industry standard.** S1–S4 all combine an ML risk score with rules on top of it. This supports the project decision to implement a hybrid mode instead of ML only (consistent with the literature review, `03_literature_review.md`).
-- **Three-tier decisions are standard.** Every system returns something equivalent to allow / review / block. Our `APPROVE` / `REVIEW` / `DECLINE` output follows this convention, which makes the API familiar to integrators.
-- **Analysts need explanations and a review queue.** All five systems have a review tool, and the market moved towards "whitebox" explanations (S1 risk insights, S3, S4). This confirms the requirement for SHAP-based reasons and an analyst dashboard.
+- **Three-tier decisions are standard.** Every system returns something equivalent to allow / review / block. Our `ALLOW` / `MANUAL_REVIEW` / `DECLINE` output (FR-4) follows this convention, which makes the API familiar to integrators.
+- **Analysts need explanations and a review queue.** All five systems have a review tool, and the market moved towards "whitebox" explanations (S1 risk insights, S3, S4). This confirms the requirements for SHAP-based reasons (NFR-5) and an analyst review dashboard (FR-5).
 
 ### 4.2 Limitations that the proposed system addresses
 
 1. **No system is both open and ML-based (C1 + C2 + C9).** The ML systems (S1–S4) are closed SaaS products; the only open, self-hostable system (S5) is rules-only. A team that wants to *inspect, reproduce and benchmark* an ML fraud model on its own infrastructure has no ready option.
-2. **No published latency figures (C3).** All vendors claim "real-time", but none publishes a measurable latency under a stated load in its documentation. The project will publish p50/p95/p99 latency under a defined load (k6), which makes the claim verifiable.
+2. **No published latency figures (C3).** All vendors claim "real-time", but none publishes a measurable latency under a stated load in its documentation. The project will publish P50/P95/P99 latency at a stated load of ≥ 500 RPS (k6), which makes the claim verifiable (NFR-1, NFR-2).
 3. **No public benchmark against a heuristic baseline (C9).** Vendor effectiveness figures (e.g., Stripe's "38 % fraud reduction", Feedzai's "62 % more fraud detected") are vendor claims on private data and cannot be reproduced. The project will compare rules-only vs. ML vs. hybrid on a public dataset (IEEE-CIS) with PR-AUC, recall at fixed FPR, and FPR.
 4. **Cost and lock-in (C7, C8).** S1 only works inside Stripe; S2 and S4 are quote-only; S3 starts at several hundred USD per month. Small PSPs, local banks and student/research teams cannot easily use them for evaluation.
-5. **Behaviour when the ML component fails is not documented.** None of the reviewed public docs describes fallback behaviour if the scoring model is unavailable. The project explicitly designs and tests a rules fallback on ML timeout.
+5. **Behaviour when the ML component fails is not documented.** None of the reviewed public docs describes fallback behaviour if the scoring model is unavailable. The project defines an explicit degraded mode for ML timeouts (NFR-3) and tests it under load.
 
 ### 4.3 What the project does **not** try to compete on
 
