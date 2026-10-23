@@ -1,0 +1,68 @@
+@startuml 02_use_case
+title Use Case Diagram – Real-Time Payment Fraud Detection System
+left to right direction
+skinparam shadowing false
+skinparam defaultFontName Monospaced
+skinparam packageStyle rectangle
+
+actor "Payment Source\n(Generator / Gateway)" as src
+actor "Fraud Analyst" as analyst
+actor "ML Engineer /\nDeveloper" as dev
+actor "DevOps / Operator" as ops
+actor "LLM Provider" as llm <<system>>
+
+rectangle "Fraud Detection System" {
+
+  usecase "UC1: Submit transaction\nfor scoring" as UC1
+  usecase "UC2: Receive decision\n(ALLOW/MANUAL_REVIEW/DECLINE)" as UC2
+  usecase "Check idempotency" as UC1a
+  usecase "Build features" as UC1b
+  usecase "Evaluate rules" as UC1c
+  usecase "Get ML score + SHAP" as UC1d
+  usecase "Fallback to rules\n(ML timeout)" as UC1e
+
+  usecase "UC3: Watch live\ntransaction stream" as UC3
+  usecase "UC4: Browse / filter\ntransactions" as UC4
+  usecase "UC5: View decision\nand explanation" as UC5
+  usecase "UC6: Review flagged\ntransaction" as UC6
+  usecase "UC7: View statistics" as UC7
+  usecase "Generate explanation" as UC5a
+
+  usecase "UC8: Configure rules\n(YAML)" as UC8
+  usecase "UC9: Switch decision mode\n(rules / ml / hybrid)" as UC9
+  usecase "UC10: Train and deploy\nmodel" as UC10
+  usecase "UC11: Run experiments\n(rules vs ML vs hybrid)" as UC11
+
+  usecase "UC12: Deploy system\n(docker compose)" as UC12
+  usecase "UC13: Monitor metrics\n(Prometheus/Grafana)" as UC13
+  usecase "UC14: Run load /\nfault-tolerance tests" as UC14
+  usecase "UC15: Trigger attack scenario\n(demo)" as UC15
+}
+
+src --> UC1
+src --> UC2
+UC1 ..> UC1a : <<include>>
+UC1 ..> UC1b : <<include>>
+UC1 ..> UC1c : <<include>>
+UC1d ..> UC1 : <<extend>>\n[mode = ml / hybrid]
+UC1e ..> UC1d : <<extend>>\n[ML unavailable]
+UC1 ..> UC2 : <<include>>
+
+analyst --> UC3
+analyst --> UC4
+analyst --> UC5
+analyst --> UC6
+analyst --> UC7
+UC5a ..> UC5 : <<extend>>\n[MANUAL_REVIEW / DECLINE]
+UC5a -- llm
+
+dev --> UC8
+dev --> UC9
+dev --> UC10
+dev --> UC11
+
+ops --> UC12
+ops --> UC13
+ops --> UC14
+ops --> UC15
+@enduml

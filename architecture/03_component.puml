@@ -1,0 +1,63 @@
+@startuml 03_component
+title Draft Component Diagram – Real-Time Payment Fraud Detection System
+skinparam shadowing false
+skinparam defaultFontName Monospaced
+skinparam componentStyle rectangle
+
+actor "Fraud Analyst" as analyst
+cloud "LLM API / Ollama" as llm
+
+package "docker compose" {
+
+  component "Generator\n[Go]\nreplays dataset as stream" as gen
+
+  package "Fraud Service [Go]" as fs {
+    component "HTTP API\n(chi/net/http, OpenAPI)" as api
+    component "Idempotency Guard" as idem
+    component "Feature Builder" as fb
+    component "Rule Engine\n(YAML rules)" as re
+    component "Model Client\n(~30 ms timeout)" as mc
+    component "Decision Engine\n(rules | ml | hybrid)" as de
+    component "Repository\n(pgx)" as repo
+    component "SSE Hub" as sse
+    component "Metrics\n(/metrics, /healthz)" as met
+  }
+
+  component "ML Service\n[Python, FastAPI]\nLightGBM + SHAP top-3" as ml
+  component "Explain Worker\n[LLM client + template fallback]" as ew
+  component "Dashboard\n[React+TS or Go templates+HTMX]" as dash
+
+  database "Redis 7\nwindows, stats, idempotency keys" as redis
+  database "PostgreSQL 16\ntransactions, decisions, explanations,\nanalyst_reviews, ground_truth" as pg
+
+  component "Prometheus" as prom
+  component "Grafana" as graf
+}
+
+gen --> api : POST /v1/transactions/score
+api --> idem
+idem --> redis : idem:{tx_id}
+api --> fb
+api --> repo : list/get tx, save review
+fb --> redis : read/update windows (Lua)
+fb --> re : features
+fb --> mc : features
+mc --> ml : POST /predict (REST/JSON)
+re --> de : rule score
+mc --> de : probability + SHAP
+de --> repo
+repo --> pg
+de --> sse
+
+analyst --> dash
+dash --> api : GET /v1/transactions, /stats,\nPOST /{id}/review
+dash <-- sse : GET /v1/stream (SSE)
+
+ew --> pg : poll MANUAL_REVIEW/DECLINE\nwithout explanation (draft)
+ew --> llm
+ew --> pg : write explanation
+
+prom --> met : scrape
+prom --> ml : scrape
+prom --> graf
+@enduml

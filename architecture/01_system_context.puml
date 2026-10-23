@@ -1,0 +1,36 @@
+@startuml 01_system_context
+title System Context Diagram – Real-Time Payment Fraud Detection System
+left to right direction
+skinparam shadowing false
+skinparam defaultFontName Monospaced
+skinparam rectangle {
+  RoundCorner 12
+}
+
+actor "Fraud Analyst" as analyst
+actor "ML Engineer /\nDeveloper" as dev
+actor "DevOps / Operator" as ops
+
+rectangle "Payment Source\n(simulated by Generator;\nreal: merchant / payment gateway)" as src <<external system>>
+rectangle "LLM Provider\n(cloud API or local Ollama)" as llm <<external system>>
+rectangle "Public Datasets\n(Sparkov, IEEE-CIS, PaySim)" as ds <<external data>>
+
+rectangle "**Real-Time Payment\nFraud Detection System**\n\nDecides ALLOW / MANUAL_REVIEW / DECLINE\nper payment in <100 ms (p95),\nrules + ML hybrid,\nexplanations for analysts" as sys #DDEEFF
+
+src --> sys : payment request\n(HTTP/JSON, POST /v1/transactions/score)
+sys --> src : decision + score + reasons\n(sync, <100 ms)
+
+analyst --> sys : reviews flagged payments,\nconfirms / rejects
+sys --> analyst : live stream (SSE),\nstats, explanations
+
+dev --> sys : rules (YAML), decision mode,\nmodel artifacts
+sys --> dev : metrics, experiment results
+
+ops --> sys : deploy (docker compose),\nload tests (k6)
+sys --> ops : /metrics, /healthz,\nGrafana dashboards
+
+sys --> llm : explanation prompt\n(features, SHAP top-3, rules)
+llm --> sys : human-readable explanation
+
+ds --> sys : CSV replay / model training
+@enduml
