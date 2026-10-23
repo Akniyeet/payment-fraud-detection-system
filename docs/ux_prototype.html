@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PFD UX prototype – Real-Time Payment Fraud Detection</title>
+<style>
+:root{--bg:#eef1f4;--sf:#fff;--ink:#14202b;--mut:#5b6b7a;--ln:#d5dce3;--ac:#2f5d8a;--red:#b3402f;--grn:#2e7d5b;--amb:#a86a0a;--code:#f5f7f9;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1720;--sf:#17222e;--ink:#e6ecf2;--mut:#93a3b3;--ln:#2a3947;--ac:#7fb0e0;--red:#f08a78;--grn:#6fcfa3;--amb:#e5b25d;--code:#0f1720}}
+:root[data-theme="dark"]{--bg:#0f1720;--sf:#17222e;--ink:#e6ecf2;--mut:#93a3b3;--ln:#2a3947;--ac:#7fb0e0;--red:#f08a78;--grn:#6fcfa3;--amb:#e5b25d;--code:#0f1720}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+header,main,nav{max-width:1000px;margin:0 auto;padding:0 20px}header{padding-top:20px}
+h1{font-size:20px;margin:0 0 4px}header p{margin:0;color:var(--mut);max-width:72ch}
+nav{display:flex;gap:6px;flex-wrap:wrap;margin-top:16px}
+nav button{border:1px solid var(--ln);background:var(--sf);color:var(--ink);padding:8px 12px;border-radius:6px;cursor:pointer;font:inherit}
+nav button[aria-selected=true]{background:var(--ac);color:#fff;border-color:var(--ac)}
+main{margin-top:12px;margin-bottom:40px}
+section{display:none;background:var(--sf);border:1px solid var(--ln);border-radius:8px;padding:18px}section.on{display:block}
+h2{font-size:17px;margin:0 0 4px}.who{color:var(--mut);margin:0 0 14px;font-size:13px}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:620px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--ln);font-size:14px;vertical-align:top}th{color:var(--mut);font-weight:600}
+tr.r{cursor:pointer}tr.r:hover,tr.r:focus{background:var(--bg);outline:none}
+.b{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;font-weight:600;border:1px solid currentColor}
+.hi{color:var(--red)}.md{color:var(--amb)}.lo{color:var(--grn)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:720px){.grid{grid-template-columns:1fr}}
+.box{border:1px solid var(--ln);border-radius:6px;padding:12px}.box h3{font-size:14px;margin:0 0 8px}
+.bar{display:grid;grid-template-columns:150px 1fr 48px;gap:8px;align-items:center;font-size:13px;margin:6px 0}.bar i{display:block;height:10px;border-radius:3px}
+.act,.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+button.c,.act button{padding:8px 13px;border-radius:6px;border:1px solid var(--ln);background:var(--sf);color:var(--ink);cursor:pointer;font:inherit}
+button.c[aria-pressed=true]{background:var(--ac);color:#fff;border-color:var(--ac)}
+.act .a{border-color:var(--grn);color:var(--grn)}.act .m{border-color:var(--amb);color:var(--amb)}.act .d{border-color:var(--red);color:var(--red)}
+pre{background:var(--code);border:1px solid var(--ln);border-radius:6px;padding:12px;overflow-x:auto;font:12.5px/1.45 Consolas,"SF Mono",monospace;margin:8px 0}
+textarea,input{width:100%;font:inherit;border:1px solid var(--ln);border-radius:6px;padding:8px;background:var(--sf);color:var(--ink)}
+.note{color:var(--mut);font-size:13px}.ban{padding:10px 12px;border-radius:6px;border:1px solid var(--amb);color:var(--amb);margin:12px 0;font-size:14px}
+.kpi{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}.kpi div{flex:1;min-width:130px;border:1px solid var(--ln);border-radius:6px;padding:10px}.kpi b{display:block;font-size:20px}
+.ph{max-width:340px;border:2px solid var(--ln);border-radius:16px;padding:16px;background:var(--bg)}.ph h4{margin:0 0 6px;font-size:15px}.ph .btn{display:block;text-align:center;padding:9px;border-radius:6px;background:var(--ac);color:#fff;margin-top:10px}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:6px;display:none}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+</style>
+</head>
+<body>
+<header>
+<h1>Real-Time Payment Fraud Detection – UX prototype</h1>
+<p>Clickable mockups of the key scenarios for the two kinds of users: the fraud analyst (dashboard) and the payment gateway (REST API), plus what the shopper sees at checkout. All data is fictional. The last tab links every scenario to use cases, requirements and interview evidence.</p>
+</header>
+<nav role="tablist">
+<button role="tab" aria-selected="true" data-t="s1">1. Live feed and queue</button>
+<button role="tab" aria-selected="false" data-t="s2">2. Review a case</button>
+<button role="tab" aria-selected="false" data-t="s3">3. Gateway API and shopper view</button>
+<button role="tab" aria-selected="false" data-t="s4">4. ML outage</button>
+<button role="tab" aria-selected="false" data-t="s5">Traceability</button>
+</nav>
+<main>
+
+<section id="s1" class="on">
+<h2>Live transaction feed</h2>
+<p class="who">Actor: fraud analyst · Goal: find the cases that need a human, riskiest first · Use cases UC3, UC4, UC7 · Requirement FR-5</p>
+<div class="kpi"><div><b id="kOpen">0</b>Open cases</div><div><b>12 480</b>Scored today</div><div><b>0.41%</b>Sent to review</div><div><b>31 ms</b>Median decision time</div></div>
+<div class="chips" role="group" aria-label="Filter"><button class="c" data-f="need" aria-pressed="true">Needs review</button><button class="c" data-f="dec" aria-pressed="false">Declined</button><button class="c" data-f="all" aria-pressed="false">All transactions</button></div>
+<div class="tw"><table><thead><tr><th>Time</th><th>Transaction</th><th>Amount</th><th>Merchant</th><th>Risk score</th><th>Decision</th><th>Status</th></tr></thead><tbody id="q"></tbody></table></div>
+<p class="note">Click a row to open the case. Automatically allowed payments need no action. Thresholds: ALLOW below 0.35, MANUAL_REVIEW from 0.35, DECLINE from 0.80 (FR-4).</p>
+</section>
+
+<section id="s2">
+<h2>Case <span id="cid"></span></h2>
+<p class="who">Actor: fraud analyst · Goal: understand why the payment was flagged and record a decision · Use cases UC5, UC6 · Requirements FR-5, FR-6, NFR-5</p>
+<div class="grid">
+<div class="box"><h3>Transaction</h3><div id="cd" class="note"></div></div>
+<div class="box"><h3>Why was it flagged?</h3><p id="ex" style="margin:0 0 8px"></p><div id="shap"></div><p class="note">Top 3 TreeSHAP drivers. Red raises the score, green lowers it.</p></div>
+</div>
+<div class="box" style="margin-top:16px"><h3>Card activity (Redis sliding windows)</h3><div class="note" id="win"></div></div>
+<label for="cm" class="note" style="display:block;margin-top:14px">Comment for the audit log</label>
+<textarea id="cm" rows="2" placeholder="Reason for your decision"></textarea>
+<div class="act"><button class="a" data-d="APPROVE_OVERRIDE">Approve (override)</button><button class="d" data-d="CONFIRM_FRAUD">Confirm fraud</button><button data-d="BACK">Back to the feed</button></div>
+<pre id="au" hidden></pre>
+</section>
+
+<section id="s3">
+<h2>Gateway request and what the shopper sees</h2>
+<p class="who">Actors: payment gateway (external system) and shopper · Goal: a verdict before the payment is cleared · Use cases UC1, UC2 · Requirements FR-1, FR-4, NFR-1, NFR-3</p>
+<div class="chips" role="group" aria-label="Example"><button class="c" data-r="ALLOW" aria-pressed="false">Low risk</button><button class="c" data-r="MANUAL_REVIEW" aria-pressed="false">Medium risk</button><button class="c" data-r="DECLINE" aria-pressed="true">High risk</button></div>
+<div class="grid"><div><b>POST /api/v1/transactions/score</b><pre id="rq"></pre></div><div><b>200 OK</b><pre id="rs"></pre></div></div>
+<b>What the shopper sees at checkout</b>
+<div class="ph" id="ph" style="margin-top:8px"></div>
+<p class="note">Low-risk payments finish without prompts. Borderline ones get a step-up challenge instead of a hard decline. A decline says what happened and what to do next (interviews 3 and 4).</p>
+<b>Errors and repeated requests</b>
+<pre>HTTP 400 Bad Request   (FR-1: mandatory field card_token is missing)
+{ "error": "VALIDATION_FAILED", "field": "card_token", "message": "card_token is required" }
+
+HTTP 200 OK   (NFR-3: same X-Idempotency-Key sent again, cached verdict, ML not called)
+{ "decision": "DECLINE", "risk_score": 0.93, "cached": true }</pre>
+<p class="note">The response schema shown here is proposed. The exact schemas belong in api/openapi.yaml (07_architecture.md).</p>
+</section>
+
+<section id="s4">
+<h2>ML service outage</h2>
+<p class="who">Actors: operator and analyst · Goal: know whether payments are still being screened · Use cases UC13, fallback to rules · Requirement NFR-3</p>
+<button class="c" id="tg" aria-pressed="false">Simulate ML service outage</button>
+<div id="bn"></div>
+<div class="kpi" style="margin-top:12px"><div><b id="hm">ML + rules</b>Scoring mode</div><div><b id="hl">31 ms</b>Median latency</div><div><b id="hr">612</b>Requests per second</div><div><b id="hb">Closed</b>Circuit breaker</div></div>
+<div id="dg"></div>
+<p class="note">Open decision for the team (09_verification_and_evaluation_plan.md, section 11): the SRS says fail open with ALLOW after 5 timeouts over 250 ms, while the architecture says decide by rules after a 30 ms timeout. This mockup shows one way to combine both. Rules decide each request, and when no rule fires the answer is ALLOW.</p>
+</section>
+
+<section id="s5">
+<h2>Scenario traceability</h2>
+<p class="who">Which user need each mockup answers, and where it comes from</p>
+<div class="tw"><table><thead><tr><th>Scenario</th><th>Actor</th><th>Use cases (07)</th><th>Requirements (06)</th><th>Evidence (02)</th></tr></thead><tbody>
+<tr><td>1 Live feed and queue</td><td>Fraud analyst</td><td>UC3, UC4, UC7</td><td>FR-5</td><td>Interview 1: over 70% of reviewed alerts are legitimate</td></tr>
+<tr><td>2 Review a case</td><td>Fraud analyst</td><td>UC5, UC6</td><td>FR-5, FR-6, NFR-5</td><td>Interview 1: top-3 SHAP factors make reviews about 3 times faster</td></tr>
+<tr><td>3 Gateway call and shopper view</td><td>Gateway, shopper</td><td>UC1, UC2</td><td>FR-1, FR-4, NFR-1, NFR-3</td><td>Interviews 2, 3, 4: P99 under 200 ms, step-up instead of hard decline, clear messages</td></tr>
+<tr><td>4 ML outage</td><td>Operator, analyst</td><td>UC13, fallback</td><td>NFR-3</td><td>Interview 2: checkout must not stop if the ML container hangs</td></tr>
+</tbody></table></div>
+<p class="note">Not mocked up yet: rule editing and mode switching (UC8, UC9, config files), model training (UC10), experiments (UC11), operations (UC12, UC14, UC15).</p>
+</section>
+</main>
+<div id="toast" role="status"></div>
+<script>
+var T=[
+{id:"tx_9f31",tm:"09:41",amt:"4 850.00 USD",m:"ElectroHub",s:0.91,st:"Open",x:"KZ card, new device, shipping to RU",f:[["Payments in the last hour",0.31],["Amount vs card average",0.24],["IP travel speed",0.18]],e:"Seven payments in one hour at three merchants, 52 times the usual amount, and the IP moved from KZ to RU in 4 minutes.",w:"1 h: 7 payments · 24 h: 9 payments · 7 d: 14 payments · 24 h spend: 11 920 USD"},
+{id:"tx_a204",tm:"09:40",amt:"720.00 USD",m:"TravelGo",s:0.71,st:"Open",x:"First payment abroad",f:[["Foreign country",0.27],["Amount vs card average",0.19],["Known merchant",-0.11]],e:"First payment from this card outside KZ, and the amount is well above average. The merchant is known, which lowers the risk.",w:"1 h: 2 payments · 24 h: 2 payments · 7 d: 6 payments · 24 h spend: 1 150 USD"},
+{id:"tx_71bd",tm:"09:38",amt:"95.40 USD",m:"CafeLine",s:0.58,st:"Open",x:"Three attempts in a row",f:[["Failed attempts",0.22],["Payments in the last hour",0.12],["Known merchant",-0.09]],e:"Three attempts in a row at the same merchant, one of them failed. The amount is small.",w:"1 h: 3 payments · 24 h: 5 payments · 7 d: 21 payments · 24 h spend: 240 USD"},
+{id:"tx_c882",tm:"09:35",amt:"39.99 USD",m:"StreamBox",s:0.38,st:"Open",x:"Rule R-12 fired",f:[["Rule R-12: new merchant",0.15],["Card age (5 years)",-0.12],["Usual amount",-0.10]],e:"A new merchant triggered rule R-12, but the card is old and the amount is typical.",w:"1 h: 1 payment · 24 h: 3 payments · 7 d: 19 payments · 24 h spend: 118 USD"},
+{id:"tx_e510",tm:"09:41",amt:"12.50 USD",m:"CafeLine",s:0.08,st:"Auto",f:[],e:"",w:""},
+{id:"tx_b377",tm:"09:40",amt:"64.00 USD",m:"GreenMarket",s:0.21,st:"Auto",f:[],e:"",w:""}];
+var F="need",cur=0;
+function dec(s){return s>=.8?"DECLINE":s>=.35?"MANUAL_REVIEW":"ALLOW"}
+function cls(s){return s>=.8?"hi":s>=.35?"md":"lo"}
+function $(i){return document.getElementById(i)}
+function rows(){var h="",n=0;T.forEach(function(t,i){var d=dec(t.s);if(t.st==="Open")n++;
+var ok=F==="all"||(F==="need"&&d!=="ALLOW"&&t.st==="Open")||(F==="dec"&&d==="DECLINE");if(!ok)return;
+h+='<tr class="r" data-i="'+i+'" '+(d!=="ALLOW"?'tabindex="0"':'')+'><td>'+t.tm+'</td><td>'+t.id+'</td><td>'+t.amt+'</td><td>'+t.m+'</td><td><span class="b '+cls(t.s)+'">'+t.s.toFixed(2)+'</span></td><td>'+d+'</td><td>'+(t.st==="Auto"?"Allowed automatically":t.st)+'</td></tr>'});
+$("q").innerHTML=h||'<tr><td colspan="7" class="note">No cases match this filter. New flagged payments appear here as they are scored.</td></tr>';$("kOpen").textContent=n}
+function show(id){document.querySelectorAll("section").forEach(function(s){s.classList.toggle("on",s.id===id)});document.querySelectorAll("nav button").forEach(function(b){b.setAttribute("aria-selected",b.dataset.t===id)})}
+function toast(m){var e=$("toast");e.textContent=m;e.style.display="block";setTimeout(function(){e.style.display="none"},2200)}
+function openCase(i){var t=T[i];if(dec(t.s)==="ALLOW")return;cur=i;$("cid").textContent=t.id;$("au").hidden=true;$("cm").value="";
+$("cd").innerHTML="Amount: <b>"+t.amt+"</b> · Merchant: "+t.m+"<br>Risk score: <span class='b "+cls(t.s)+"'>"+t.s.toFixed(2)+"</span> · System decision: "+dec(t.s)+"<br>Context: "+t.x+"<br>Card token: 9c1f…e2a4 · IP: 203.0.113.24 · Device: d77aa1c9<br>Status: "+t.st;
+$("ex").textContent=t.e;var h="";t.f.forEach(function(f){h+='<div class="bar"><span>'+f[0]+'</span><i style="width:'+Math.abs(f[1])*300+'px;background:var(--'+(f[1]>0?"red":"grn")+')"></i><span>'+(f[1]>0?"+":"")+f[1].toFixed(2)+'</span></div>'});
+$("shap").innerHTML=h;$("win").textContent=t.w;show("s2")}
+document.querySelector("nav").onclick=function(e){if(e.target.dataset.t)show(e.target.dataset.t)};
+document.querySelector("#s1 .chips").onclick=function(e){var f=e.target.dataset.f;if(!f)return;F=f;this.querySelectorAll("button").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.f===f)});rows()};
+$("q").onclick=function(e){var r=e.target.closest("tr.r");if(r)openCase(+r.dataset.i)};
+$("q").onkeydown=function(e){if(e.key==="Enter"){var r=e.target.closest("tr.r");if(r)openCase(+r.dataset.i)}};
+document.querySelector("#s2 .act").onclick=function(e){var d=e.target.dataset.d;if(!d)return;if(d==="BACK"){rows();show("s1");return}
+var t=T[cur];t.st=d;$("au").hidden=false;$("au").textContent=JSON.stringify({audit_record:{transaction_id:t.id,system_decision:dec(t.s),risk_score:t.s,analyst_action:d,comment:$("cm").value||"(none)",analyst:"analyst_01",decided_at:"2026-10-24T09:44:03Z"}},null,2);toast("Decision saved: "+d);rows()};
+var V={ALLOW:{s:0.07,l:"LOW",r:[]},MANUAL_REVIEW:{s:0.64,l:"MEDIUM",r:["tx_count_1h","amount_vs_avg","new_device"]},DECLINE:{s:0.93,l:"HIGH",r:["tx_count_1h","ip_velocity","amount_vs_avg"]}};
+var P={ALLOW:"<h4>Payment successful</h4><div class='note'>Your order is confirmed. No extra steps were needed.</div><div class='btn'>Back to the shop</div>",
+MANUAL_REVIEW:"<h4>Confirm it is you</h4><div class='note'>For your security, enter the code we sent to the phone ending in 4821.</div><input aria-label='Code' placeholder='6-digit code' style='margin-top:8px'><div class='btn'>Confirm payment</div>",
+DECLINE:"<h4>Payment blocked for security</h4><div class='note'>Your card was not charged. Try another card, or contact your bank to confirm this payment.</div><div class='btn'>Use another card</div>"};
+function api(k){var x=V[k];$("rq").textContent="X-Idempotency-Key: IDEMP-001\n\n"+JSON.stringify({transaction_id:"3f2b8c1e-7d4a-4c9b-9a51-0e6f2d8b1a77",card_token:"9c1f3a7e51b0d2c4 (SHA-256 hash)",amount:4850.00,currency:"USD",timestamp:"2026-10-24T09:41:12Z",merchant_id:"m_5521",merchant_category_code:"5732",ip_address:"203.0.113.24",device_fingerprint:"d77aa1c9e0"},null,2);
+$("rs").textContent=JSON.stringify({transaction_id:"3f2b8c1e-7d4a-4c9b-9a51-0e6f2d8b1a77",decision:k,risk_score:x.s,risk_level:x.l,top_factors:x.r,latency_ms:28},null,2);$("ph").innerHTML=P[k];
+document.querySelectorAll("#s3 .chips button").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.r===k)})}
+document.querySelector("#s3 .chips").onclick=function(e){if(e.target.dataset.r)api(e.target.dataset.r)};
+var down=false;$("tg").onclick=function(){down=!down;this.setAttribute("aria-pressed",down);this.textContent=down?"Restore ML service":"Simulate ML service outage";
+$("bn").innerHTML=down?'<div class="ban">The ML service is not responding. Rules are deciding every payment, and responses carry risk_level DEGRADED_FALLBACK. Payments are still being screened, but without the model.</div>':"";
+$("hm").textContent=down?"Rules only":"ML + rules";$("hl").textContent=down?"12 ms":"31 ms";$("hb").textContent=down?"Open":"Closed";
+$("dg").innerHTML=down?'<b>Example responses while degraded</b><pre>{ "decision": "ALLOW", "risk_score": null, "risk_level": "DEGRADED_FALLBACK", "reason": "no rule fired" }\n\n{ "decision": "MANUAL_REVIEW", "risk_score": null, "risk_level": "DEGRADED_FALLBACK", "reason": "rule R-12 fired" }</pre>':""};
+rows();api("DECLINE");
+</script>
+</body>
+</html>
