@@ -53,7 +53,7 @@ analyst --> dash
 dash --> api : GET /v1/transactions, /stats,\nPOST /{id}/review
 dash <-- sse : GET /v1/stream (SSE)
 
-ew --> pg : poll REVIEW/DECLINE\nwithout explanation (draft)
+ew --> pg : poll MANUAL_REVIEW/DECLINE\nwithout explanation (draft)
 ew --> llm
 ew --> pg : write explanation
 

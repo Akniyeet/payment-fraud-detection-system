@@ -15,7 +15,7 @@ rectangle "Payment Source\n(simulated by Generator;\nreal: merchant / payment ga
 rectangle "LLM Provider\n(cloud API or local Ollama)" as llm <<external system>>
 rectangle "Public Datasets\n(Sparkov, IEEE-CIS, PaySim)" as ds <<external data>>
 
-rectangle "**Real-Time Payment\nFraud Detection System**\n\nDecides APPROVE / REVIEW / DECLINE\nper payment in <100 ms (p95),\nrules + ML hybrid,\nexplanations for analysts" as sys #DDEEFF
+rectangle "**Real-Time Payment\nFraud Detection System**\n\nDecides ALLOW / MANUAL_REVIEW / DECLINE\nper payment in <100 ms (p95),\nrules + ML hybrid,\nexplanations for analysts" as sys #DDEEFF
 
 src --> sys : payment request\n(HTTP/JSON, POST /v1/transactions/score)
 sys --> src : decision + score + reasons\n(sync, <100 ms)

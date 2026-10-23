@@ -1,5 +1,14 @@
 # Architectural Description – Real-Time Payment Fraud Detection System
 
+**Task ID:** PFD-10  
+**Component:** Component 07 – Architecture and Diagrams  
+**Author:** Roman  
+**Status:** Completed & Verified  
+
+---
+
+# Architectural Description – Real-Time Payment Fraud Detection System
+
 Sources:
 - [`01_system_context.puml`](../architecture/01_system_context.puml)
 - [`02_use_case.puml`](../architecture/02_use_case.puml)
@@ -7,7 +16,7 @@ Sources:
 
 ## 1. Purpose and key requirements
 
-The system scores each payment synchronously and returns APPROVE / REVIEW / DECLINE.
+The system scores each payment synchronously and returns ALLOW / MANUAL_REVIEW / DECLINE.
 
 | ID    | Requirement                                                                 |
 | ----- |---------------------------------------------------------------------------- |
@@ -18,7 +27,7 @@ The system scores each payment synchronously and returns APPROVE / REVIEW / DECL
 | NFR-5 | Whole stack starts with one `docker compose up`                             |
 | FR-1  | Three decision modes: rules / ml / hybrid                                   |
 | FR-2  | Analyst gets explanations (SHAP top-3 + LLM text, template fallback)        |
-| FR-3  | Analyst review of REVIEW/DECLINE decisions is stored                        |
+| FR-3  | Analyst review of MANUAL_REVIEW/DECLINE decisions is stored                        |
 
 ## 2. [System Context](../architecture/01_system_context.svg) (diagram 1)
 
@@ -45,7 +54,7 @@ Relations:
 - UC1 "include" idempotency check, feature building, rule evaluation, UC2.
 - "Get ML score + SHAP" "extend" UC1 only in ml/hybrid mode.
 - "Fallback to rules" "extend" ML scoring when ML is unavailable.
-- "Generate explanation" "extend" UC5 only for REVIEW/DECLINE.
+- "Generate explanation" "extend" UC5 only for MANUAL_REVIEW/DECLINE.
 
 ## 4. [Components](../architecture/03_component.svg) (diagram 3, draft)
 
@@ -54,7 +63,7 @@ Relations:
 | Generator      | Go                                     | Replays dataset rows as payment requests; attack scenarios for demo                                                                   |
 | Fraud Service  | Go                                     | Core. HTTP API, Idempotency Guard, Feature Builder, Rule Engine, Model Client, Decision Engine, Repository, SSE Hub, Metrics          |
 | ML Service     | Python, FastAPI, LightGBM, SHAP        | `/predict` returns fraud probability + SHAP top-3                                                                                     |
-| Explain Worker | LLM client + templates                 | Async explanation for REVIEW/DECLINE                                                                                                  |
+| Explain Worker | LLM client + templates                 | Async explanation for MANUAL_REVIEW/DECLINE                                                                                           |
 | Dashboard      | React+TS or Go templates+HTMX          | Live feed, details, review, stats                                                                                                     |
 | Redis          | Redis 7, go-redis, Lua script/pipeline | Sliding windows (`cust:{id}:tx` zset 24h), customer stats (hash, 90d), merchant/category sets, idempotency keys (`idem:{tx_id}`, 24h) |
 | PostgreSQL     | PostgreSQL 16, pgx                     | `transactions`, `decisions`, `explanations`, `analyst_reviews`, `ground_truth`                                                        |

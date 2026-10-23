@@ -14,7 +14,7 @@ actor "LLM Provider" as llm <<system>>
 rectangle "Fraud Detection System" {
 
   usecase "UC1: Submit transaction\nfor scoring" as UC1
-  usecase "UC2: Receive decision\n(APPROVE/REVIEW/DECLINE)" as UC2
+  usecase "UC2: Receive decision\n(ALLOW/MANUAL_REVIEW/DECLINE)" as UC2
   usecase "Check idempotency" as UC1a
   usecase "Build features" as UC1b
   usecase "Evaluate rules" as UC1c
@@ -53,7 +53,7 @@ analyst --> UC4
 analyst --> UC5
 analyst --> UC6
 analyst --> UC7
-UC5a ..> UC5 : <<extend>>\n[REVIEW / DECLINE]
+UC5a ..> UC5 : <<extend>>\n[MANUAL_REVIEW / DECLINE]
 UC5a -- llm
 
 dev --> UC8
