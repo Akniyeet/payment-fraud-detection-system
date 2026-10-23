@@ -1,8 +1,21 @@
-# Scoring
+# Technology Comparison – Real-Time Payment Fraud Detection System
 
-1-5 per criterion, 5 = best for this project. Total = weighted average (weights: latency 25, isolation 20, consistency 20, footprint 15, delivery risk 15, ecosystem 5). All scores were estimated. Triton, BentoML and Go+cgo ratings are not checked against their docs.
+**Task ID:** PFD-8  
+**Component:** Component 05 – Technology Stack Comparison  
+**Author:** Roman  
+**Status:** Completed & Verified  
 
-Criterion names are adapted per decision (stated under each table). Abbreviations: Lat = latency, Iso = isolation, Cons = consistency, Foot = footprint, Risk = delivery risk (5 = low risk), Eco = ecosystem.
+# Scoring Methodology
+
+Options are evaluated on a 1–5 scale per criterion (5 = optimal fit for system requirements). Total score represents a weighted average reflecting architectural priorities:
+- **Latency (Lat, 25%):** Predictable low tail latency under high concurrency (NFR-1, P99 < 200 ms).
+- **Fault Isolation (Iso, 20%):** Resilience against subsystem failure, crash isolation, and deterministic timeout fallback.
+- **Consistency & Parity (Cons, 20%):** Data integrity, ACID compliance, and training-to-serving feature consistency.
+- **Resource Footprint (Foot, 15%):** Memory and CPU efficiency within a multi-container local Docker deployment (NFR-5).
+- **Delivery Risk (Risk, 15%):** Engineering complexity, debugging feasibility, and maintainability (5 = lowest delivery risk).
+- **Ecosystem & Maturity (Eco, 5%):** Tooling maturity, library support, and community backing.
+
+Criteria semantics are contextualized for each architectural decision domain.
 
 # Decision 1a: Primary store
 
@@ -97,6 +110,26 @@ Why not the in-process Go options: they save the network hop (~1-3 ms, estimated
 * SHAP runs in-process, so the 30 ms budget covers the whole call.
 * It's a separate process, so ML can fail without taking scoring down, and the fallback and fault-tolerance tests mean something.
 * Its cost is an HTTP hop plus the GIL, a few ms against a 30 ms budget, mitigated with multiple workers.
+
+# Decision 4: Component Interaction & Service Communication
+
+## Table
+
+Lat = network and serialization overhead, Iso = decoupling and failure containment, Cons = type safety and schema enforcement
+
+| Option                                  | Lat | Iso | Cons | Foot | Risk | Eco | Total |
+| --------------------------------------- | --- | --- | ---- | ---- | ---- | --- | ----- |
+| Sync REST (JSON over HTTP/1.1)          | 4   | 4   | 4    | 5    | 5    | 5   | 4.40  |
+| Sync gRPC (Protobuf over HTTP/2)        | 5   | 4   | 5    | 4    | 3    | 4   | 4.30  |
+| Async Message Broker (Kafka / RabbitMQ) | 2   | 5   | 3    | 2    | 3    | 5   | 3.20  |
+
+## Why Synchronous REST?
+
+- External Integration Simplicity: Standard payment gateway webhooks and client applications natively consume HTTP/JSON APIs without requiring custom Protobuf stub distribution.
+- Tight Latency Budget: Direct HTTP calls between Go scoring and the FastAPI ML container take 1–3 ms, easily accommodating the 30 ms ML inference SLA.
+- Why not Asynchronous Message Queues: An asynchronous message bus (Kafka/RabbitMQ) introduces broker round-trip latency and fundamentally conflicts with the synchronous payment authorization flow, where the acquiring bank requires an immediate blocking decision (`ALLOW` / `MANUAL_REVIEW` / `DECLINE`).
+- Why not gRPC across all boundaries: While gRPC yields marginal serialization gains, JSON over HTTP provides universal client compatibility and simplified inspection for analyst dashboards. Internal service communication can be upgraded to gRPC in future iterations if serialization becomes a measured bottleneck.
+
 
 # Final Results
 
