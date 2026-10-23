@@ -5,6 +5,8 @@
 **Author:** Roman  
 **Status:** Completed & Verified  
 
+---
+
 # Scoring Methodology
 
 Options are evaluated on a 1–5 scale per criterion (5 = optimal fit for system requirements). Total score represents a weighted average reflecting architectural priorities:
